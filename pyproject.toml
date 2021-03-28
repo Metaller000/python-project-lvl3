@@ -4,20 +4,23 @@ version = "0.1.0"
 description = "page loader"
 authors = ["Metaller <metaller7440326@gmail.com>"]
 packages = [
-  { include = "gendiff" },
+    { include = "page_loader" },
 ]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.5.5"
 flake8 = "^3.8.4"
 pytest = "^6.2.2"
 
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+
 [tool.poetry.scripts]
-gendiff = "page_loader.loader:main"
+page-loader = "page_loader.page_loader:main"
