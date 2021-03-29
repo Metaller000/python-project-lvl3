@@ -4,7 +4,7 @@ from page_loader import download
 
 
 def main():
-    parser = argparse.ArgumentParser(description='pageloader')
+    parser = argparse.ArgumentParser(description='page loader')
     parser.add_argument('url', type=str)
 
     parser.add_argument('-o',
@@ -12,7 +12,7 @@ def main():
                         type=str,
                         help='set output directory')
 
-    args = parser.parse_args() 
+    args = parser.parse_args()
 
     if args.output is not None and args.url is not None:
         print(download(args.url, args.output))
