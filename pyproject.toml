@@ -8,7 +8,7 @@ authors = ["Metaller <metaller7440326@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.8"
 requests = "^2.25.1"
-
+beautifulsoup4 = "^4.9.3"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.5.5"
