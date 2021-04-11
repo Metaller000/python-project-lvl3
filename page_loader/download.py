@@ -1,28 +1,50 @@
 import os
 import re
 import requests
+import logging
+import sys
 
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
+logger = logging.getLogger(__name__)
+
+logger.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+
+stdout_handler = logging.StreamHandler(sys.stdout)
+stdout_handler.setLevel(logging.DEBUG)
+stdout_handler.setFormatter(formatter)
+
+file_handler = logging.FileHandler('app.log')
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(stdout_handler)
+
 
 def get_file_name(url='', extension='.html'):
+    logger.debug(f'file: {url}, text: {extension}')
     url = re.sub(r'\b(https:|http:|url:|ftp:)[^a-zA-Z ]{2}', '', url)
     return f"{re.sub(r'[^A-Za-z0-9]', '-', url)}{extension}"
 
 
 def write_file(file='', text=''):
+    logger.debug(f'file: {file}, text: {text}')
     with open(file, 'w', encoding='utf-8') as w:
         w.write(text)
 
 
 def write_bin(file='', binory=[]):
+    logger.debug(f'file: {file}, binory: {binory}')
     os.makedirs(os.path.dirname(file), exist_ok=True)
     with open(file, 'wb') as w:
         w.write(binory)
 
 
 def download_files(data='', folder=os.getcwd(), url=''):
+    logger.debug(f'data: {data}, folder: {folder}, url: {url}')
     hostname = urlparse(url).hostname
     soup = BeautifulSoup(data, 'html.parser')
     for link in soup.find_all(['img', 'link', 'script']):
@@ -57,10 +79,12 @@ def download_files(data='', folder=os.getcwd(), url=''):
 
         data = data.replace(old_name, new_src)
 
+    logger.debug(f'data: {data}')
     return data
 
 
 def download(url='', folder=os.getcwd()):
+    logger.debug(f'data: {url}, {folder}')
     file_name = f'{folder}/{get_file_name(url)}'
     page_data = requests.get(url).text
     page_data = download_files(page_data, folder, url)
