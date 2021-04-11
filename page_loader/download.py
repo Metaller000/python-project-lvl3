@@ -2,7 +2,6 @@ import os
 import re
 import requests
 import logging
-import sys
 
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
@@ -12,16 +11,11 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
 
-stdout_handler = logging.StreamHandler(sys.stdout)
-stdout_handler.setLevel(logging.DEBUG)
-stdout_handler.setFormatter(formatter)
-
 file_handler = logging.FileHandler('app.log')
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
-logger.addHandler(stdout_handler)
 
 
 def get_file_name(url='', extension='.html'):
@@ -32,15 +26,23 @@ def get_file_name(url='', extension='.html'):
 
 def write_file(file='', text=''):
     logger.debug(f'file: {file}, text: {text}')
-    with open(file, 'w', encoding='utf-8') as w:
-        w.write(text)
+    try:
+        with open(file, 'w', encoding='utf-8') as w:
+            w.write(text)
+    except Exception as exp:
+        logger.error(exp)
+        print(exp)
 
 
 def write_bin(file='', binory=[]):
     logger.debug(f'file: {file}, binory: {binory}')
-    os.makedirs(os.path.dirname(file), exist_ok=True)
-    with open(file, 'wb') as w:
-        w.write(binory)
+    try:
+        os.makedirs(os.path.dirname(file), exist_ok=True)
+        with open(file, 'wb') as w:
+            w.write(binory)
+    except Exception as exp:
+        logger.error(exp)
+        print(exp)
 
 
 def download_files(data='', folder=os.getcwd(), url=''):
@@ -68,15 +70,17 @@ def download_files(data='', folder=os.getcwd(), url=''):
         new_name = get_file_name(f'{hostname}-{old_file_name}', file_suffix)
 
         binory = []
-        if 'https' in old_name or 'http' in old_name or 'url' in old_name or 'ftp' in old_name:
-            binory = requests.get(old_name).content
-        else:
-            binory = requests.get(f'http://{hostname}/{old_file_name}{file_suffix}').content
+        try:
+            if 'https' in old_name or 'http' in old_name or 'url' in old_name or 'ftp' in old_name:
+                binory = requests.get(old_name).content
+            else:
+                binory = requests.get(f'http://{hostname}/{old_file_name}{file_suffix}').content
+        except Exception as exp:
+            logger.error(exp)
+            print(exp)
 
         new_src = f'{get_file_name(url, "_files")}/{new_name}'
-
         write_bin(f'{folder}/{new_src}', binory)
-
         data = data.replace(old_name, new_src)
 
     logger.debug(f'data: {data}')
@@ -86,7 +90,14 @@ def download_files(data='', folder=os.getcwd(), url=''):
 def download(url='', folder=os.getcwd()):
     logger.debug(f'data: {url}, {folder}')
     file_name = f'{folder}/{get_file_name(url)}'
-    page_data = requests.get(url).text
+
+    page_data = ''
+    try:
+        page_data = requests.get(url).text
+    except Exception as exp:
+        logger.error(exp)
+        print(exp)
+
     page_data = download_files(page_data, folder, url)
     write_file(file_name, page_data)
     return file_name

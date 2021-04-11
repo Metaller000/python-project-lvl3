@@ -21,19 +21,20 @@ def files():
 @pytest.fixture()
 def url():
     return ("https://ru.hexlet.io/courses",
-            'http://test.com')
+            'http://test.ccc')
 
 
 @pytest.fixture()
 def folders():
     return ("/var/tmp",
-            "/var/tmp/ru-hexlet-io-courses_files")
+            "/var/tmp/ru-hexlet-io-courses_files",
+            "/bin")
 
 
 @pytest.fixture()
 def file_names():
     return ("ru-hexlet-io-courses.html",
-            "test-com.html",
+            "test-ccc.html",
             "ru-hexlet-io-courses_files",
             "ru-hexlet-io-courses.png",
             "ru-hexlet-io-ru-hexlet-io-lesson.rss")
@@ -65,3 +66,15 @@ def test_download_2(folders, url, file_names):
 
     with open(f'{folders[0]}/{file_names[0]}', 'r') as data:
         assert f'{file_names[4]}' in data.read()
+
+
+def test_exception(folders, url):
+    try:
+        download(url[1], folders[0])
+    except Exception as exp:
+        assert 'ConnectionError' in exp
+
+    try:
+        download(url[1], folders[2])
+    except Exception as exp:
+        assert 'Permission denied' in exp
