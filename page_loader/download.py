@@ -2,19 +2,25 @@ import os
 import re
 import requests
 import logging
+import sys
 
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
+from progress.spinner import Spinner
 
 logger = logging.getLogger(__name__)
 
 logger.setLevel(logging.ERROR)
 formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
 
+stdout_handler = logging.StreamHandler(sys.stdout)
+stdout_handler.setLevel(logging.DEBUG)
+stdout_handler.setFormatter(formatter)
+logger.addHandler(stdout_handler)
+
 file_handler = logging.FileHandler('app.log')
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
-
 logger.addHandler(file_handler)
 
 
@@ -31,7 +37,7 @@ def write_file(file='', text=''):
             w.write(text)
     except Exception as exp:
         logger.error(exp)
-        print(exp)
+        os._exit(0)
 
 
 def write_bin(file='', binory=[]):
@@ -42,13 +48,19 @@ def write_bin(file='', binory=[]):
             w.write(binory)
     except Exception as exp:
         logger.error(exp)
-        print(exp)
+        os._exit(0)
 
 
 def download_files(data='', folder=os.getcwd(), url=''):
     logger.debug(f'data: {data}, folder: {folder}, url: {url}')
     hostname = urlparse(url).hostname
     soup = BeautifulSoup(data, 'html.parser')
+
+    parts = len(soup.find_all(['img', 'link', 'script']))
+    spinner = None
+    if (parts != 0):
+        spinner = Spinner('Download files ')
+
     for link in soup.find_all(['img', 'link', 'script']):
         old_name = ''
         if '<link' in str(link):
@@ -77,11 +89,15 @@ def download_files(data='', folder=os.getcwd(), url=''):
                 binory = requests.get(f'http://{hostname}/{old_file_name}{file_suffix}').content
         except Exception as exp:
             logger.error(exp)
-            print(exp)
+            os._exit(0)
 
         new_src = f'{get_file_name(url, "_files")}/{new_name}'
         write_bin(f'{folder}/{new_src}', binory)
         data = data.replace(old_name, new_src)
+        spinner.next()
+
+    if spinner is not None:
+        spinner.finish()
 
     logger.debug(f'data: {data}')
     return data
@@ -89,14 +105,23 @@ def download_files(data='', folder=os.getcwd(), url=''):
 
 def download(url='', folder=os.getcwd()):
     logger.debug(f'data: {url}, {folder}')
+
+    if url[-1] == '/':
+        url = url[0:-1]
+
     file_name = f'{folder}/{get_file_name(url)}'
+
+    spinner = Spinner('Download page ')
 
     page_data = ''
     try:
         page_data = requests.get(url).text
     except Exception as exp:
         logger.error(exp)
-        print(exp)
+        os._exit(0)
+
+    spinner.next()
+    spinner.finish()
 
     page_data = download_files(page_data, folder, url)
     write_file(file_name, page_data)

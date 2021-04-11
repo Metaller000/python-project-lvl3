@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "page_loader"
-version = "0.1.0"
+version = "1.0.0"
 description = "page loader"
 authors = ["Metaller <metaller7440326@gmail.com>"]
 
@@ -9,6 +9,7 @@ authors = ["Metaller <metaller7440326@gmail.com>"]
 python = "^3.8"
 requests = "^2.25.1"
 beautifulsoup4 = "^4.9.3"
+progress = "^1.5"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.5.5"
