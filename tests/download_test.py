@@ -21,8 +21,13 @@ def files():
 @pytest.fixture()
 def url():
     return ("https://ru.hexlet.io/courses",
-            'http://test.com',
-            'https://en.wikipedia.org/404')
+            'http://test.com')
+
+
+@pytest.fixture()
+def folders():
+    return ("/var/tmp",
+            "/var/tmp/ru-hexlet-io-courses_files")
 
 
 @pytest.fixture()
@@ -31,17 +36,7 @@ def file_names():
             "test-com.html",
             "ru-hexlet-io-courses_files",
             "ru-hexlet-io-courses.png",
-            "file-1.png",
-            "file-2-file-2.jpg",
-            "file_1.png",
-            "en-wikipedia-org-www-wikimedia-org-static-images-wmf.png")
-
-
-@pytest.fixture()
-def folders():
-    return ("/var/tmp",
-            "/ru-hexlet-io-courses_files",
-            "/var/tmp/en-wikipedia-org-404_files")
+            "ru-hexlet-io-ru-hexlet-io-lesson.rss")
 
 
 def test_get_file_name(url, file_names):
@@ -62,14 +57,11 @@ def test_download(requests_mock, folders, url, file_names):
     with open(dir_check, 'r') as data:
         assert data.read() == test_text
 
-def test_download_2(folders, url):
-    dir_res = download(url[2], folders[0])
-    
 
-  
-def test_download_files(folders, url, file_names):       
-    download_files(requests.get(url[2]).text, folders[0], url[2])
+def test_download_2(folders, url, file_names):
+    download(url[0], folders[0])
 
-    assert file_names[7] == os.listdir(folders[2])[0]
+    assert file_names[4] in os.listdir(folders[1])
 
-    
+    with open(f'{folders[0]}/{file_names[0]}', 'r') as data:
+        assert f'{file_names[4]}' in data.read()

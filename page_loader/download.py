@@ -25,19 +25,36 @@ def write_bin(file='', binory=[]):
 def download_files(data='', folder=os.getcwd(), url=''):
     hostname = urlparse(url).hostname
     soup = BeautifulSoup(data, 'html.parser')
-    for link in soup.find_all('img'):
-        old_name = link.get('src')
-        new_name = get_file_name(f'{hostname}-{old_name}'.rstrip(".png"), ".png")
+    for link in soup.find_all(['img', 'link', 'script']):
+        old_name = ''
+        if '<link' in str(link):
+            old_name = link.get('href')
+        else:
+            old_name = link.get('src')
+
+        old_name_host = urlparse(old_name).hostname
+
+        try:
+            file_suffix = os.path.splitext(old_name)[-1]
+        except TypeError:
+            continue
+
+        if hostname != old_name_host and old_name_host is not None:
+            continue
+
+        old_file_name = old_name.rstrip(file_suffix).lstrip('/')
+        new_name = get_file_name(f'{hostname}-{old_file_name}', file_suffix)
 
         binory = []
         if 'https' in old_name or 'http' in old_name or 'url' in old_name or 'ftp' in old_name:
             binory = requests.get(old_name).content
         else:
-            binory = requests.get(f'{hostname}/{old_name}').content
+            binory = requests.get(f'http://{hostname}/{old_file_name}{file_suffix}').content
 
         new_src = f'{get_file_name(url, "_files")}/{new_name}'
 
         write_bin(f'{folder}/{new_src}', binory)
+
         data = data.replace(old_name, new_src)
 
     return data
