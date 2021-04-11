@@ -1,8 +1,11 @@
 [tool.poetry]
-name = "page_loader"
+name = "hexlet-code"
 version = "1.0.0"
 description = "page loader"
 authors = ["Metaller <metaller7440326@gmail.com>"]
+packages = [
+  { include = "page_loader" },
+]
 
 
 [tool.poetry.dependencies]
