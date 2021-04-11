@@ -1,8 +1,7 @@
 import pytest
 import requests
-import requests_mock
 import os
-from page_loader.download import download, get_file_name, write_file, download_files, write_bin
+from page_loader.download import download, get_file_name
 
 
 @pytest.fixture()
